@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Startopsy – Reduce Startup Risk Before You Build</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f0f0f;
+      color: #ffffff;
+    }
+
+    header {
+      padding: 20px 40px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    section {
+      padding: 80px 40px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 42px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #b5b5b5;
+      line-height: 1.6;
+    }
+
+    .cta {
+      margin-top: 30px;
+    }
+
+    button {
+      background: white;
+      color: black;
+      padding: 14px 24px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .secondary-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 10px;
+    }
+
+    .highlight {
+      margin-top: 20px;
+      font-weight: 600;
+      color: white;
+    }
+
+    #wizard {
+      display: none;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    input[type="email"] {
+      padding: 12px;
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    footer {
+      padding: 60px 40px;
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  Startopsy
+</header>
+
+<!-- HERO -->
+<section id="hero">
+  <h1>
+    Reduce startup risk before it becomes expensive.
+  </h1>
+
+  <p>
+    Detect critical weaknesses in your startup thinking — and join early access to Startopsy’s risk tracking system.
+  </p>
+
+  <p class="highlight">
+    Structured risk assessment. Continuous tracking. Built to prevent avoidable failure.
+  </p>
+
+  <div class="cta">
+    <button onclick="startAssessment()">Start Risk Assessment</button>
+  </div>
+</section>
+
+<!-- HOW RISK WORKS -->
+<section>
+  <h2>How Startopsy Detects & Tracks Risk</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Failure Pattern Recognition</h3>
+      <p>We analyze recurring patterns behind failed startups to detect early warning signals.</p>
+    </div>
+
+    <div class="card">
+      <h3>Market & Monetization Stress Test</h3>
+      <p>We evaluate saturation risk, willingness to pay, and revenue model weaknesses.</p>
+    </div>
+
+    <div class="card">
+      <h3>Founder–Market Fit</h3>
+      <p>Your execution capacity is evaluated against your market complexity.</p>
+    </div>
+
+    <div class="card">
+      <h3>Ongoing Risk Tracking</h3>
+      <p>As you build, Startopsy monitors evolving risks before they become fatal mistakes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <h2>How It Works</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3>1. Answer Key Questions</h3>
+      <p>Go through a structured startup risk assessment.</p>
+    </div>
+
+    <div class="card">
+      <h3>2. Join the Early Waitlist</h3>
+      <p>Early members help validate Startopsy and shape the beta experience.</p>
+    </div>
+
+    <div class="card">
+      <h3>3. Get Priority Access</h3>
+      <p>The first 50 members receive lifetime benefits and a free trial at launch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WIZARD -->
+<section id="wizard">
+  <h2>Startup Risk Assessment</h2>
+
+  <div class="step active" id="step1">
+    <p>Are you currently working on a startup idea?</p>
+    <button onclick="nextStep(2)">Yes</button>
+    <button onclick="nextStep(2)">Still validating</button>
+  </div>
+
+  <div class="step" id="step2">
+    <p>Have you launched before?</p>
+    <button onclick="nextStep(3)">Yes</button>
+    <button onclick="nextStep(3)">No</button>
+  </div>
+
+  <div class="step" id="step3">
+    <p>Would you pay to reduce your startup risk?</p>
+    <button onclick="nextStep(4)">Yes</button>
+    <button onclick="nextStep(4)">Maybe</button>
+    <button onclick="nextStep(4)">Not sure</button>
+  </div>
+
+  <div class="step" id="step4">
+    <h3>Join the Startopsy Waitlist</h3>
+    <p>
+      Early access is limited to the first 50 members.  
+      You will receive an email immediately with a short validation form.
+    </p>
+
+    <form action="https://formsubmit.co/youremail@example.com" method="POST">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_autoresponse" value="Welcome to Startopsy Beta. Please check your email to answer a few questions that help us validate the platform. The first 50 members will receive a free trial at launch.">
+
+      <input type="email" name="email" required placeholder="Your email address">
+      <br><br>
+      <button type="submit">Join Waitlist</button>
+    </form>
+
+    <p class="highlight">
+      Only the first 50 members receive lifetime benefits.
+    </p>
+  </div>
+</section>
+
+<footer>
+  © 2026 Startopsy. Preventing avoidable startup failure.
+</footer>
+
+<script>
+  function startAssessment() {
+    document.getElementById("hero").style.display = "none";
+    document.getElementById("wizard").style.display = "block";
+  }
+
+  function nextStep(step) {
+    const steps = document.querySelectorAll(".step");
+    steps.forEach(s => s.classList.remove("active"));
+    document.getElementById("step" + step).classList.add("active");
+  }
+</script>
+
+</body>
+</html>
