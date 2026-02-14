@@ -832,10 +832,13 @@
                 <div class="flex items-start gap-3">
                     <i data-lucide="alert-triangle" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
                     <div class="text-white">
-                        <p class="font-bold mb-1">Survey incomplet</p>
-                        <p class="text-sm text-gray-300">Vous n'avez pas complété les 6 questions du sondage. Les réponses aident à personnaliser votre analyse.</p>
+                        <p class="font-bold mb-1">Survey Incomplete</p>
+                        <p class="text-sm text-gray-300">You haven't completed all 6 survey questions. Your answers help us personalize your analysis and provide better insights.</p>
                         <button onclick="backToWizard()" class="mt-2 text-[#FF6B4A] hover:text-[#ff5530] font-medium text-sm underline">
-                            ← Retourner au sondage
+                            ← Return to survey
+                        </button>
+                        <button onclick="skipSurvey()" class="mt-2 ml-4 text-gray-300 hover:text-white font-medium text-sm underline">
+                            Skip and continue anyway →
                         </button>
                     </div>
                 </div>
@@ -1233,6 +1236,11 @@
         }
 
         function startDiagnostic() {
+            gtag('event', 'wizard_started', {
+                event_category: 'engagement',
+                event_label: 'diagnostic_wizard'
+            });
+            
             const wizard = document.getElementById('wizard-section');
             wizard.classList.remove('hidden');
             setTimeout(() => {
@@ -1292,6 +1300,12 @@
         }
 
         function showChoiceOverlay() {
+            // Track wizard completion when showing choice overlay
+            gtag('event', 'wizard_completed', {
+                event_category: 'engagement',
+                event_label: 'diagnostic_wizard'
+            });
+            
             document.getElementById('step-choice-overlay').style.display = 'flex';
             document.body.style.overflow = 'hidden';
             lucide.createIcons();
@@ -1304,9 +1318,11 @@
             
             if (!wizardComplete) {
                 warningEl.classList.remove('hidden');
-            } else {
-                warningEl.classList.add('hidden');
-            }
+                return; // Stop here if not complete
+            } 
+
+            // Hide warning if wizard was completed
+            warningEl.classList.add('hidden');
             
             // Populate hidden fields with survey answers
             document.getElementById('hidden-step1').value = userSelections.step1 || '';
@@ -1320,12 +1336,24 @@
             const overlay = document.getElementById('step-manual-form-overlay');
             overlay.style.display = 'block';
             
-            // IMPORTANT: Scroll vers le haut de l'overlay
+            // Scroll to top of overlay
             setTimeout(() => {
                 overlay.scrollTop = 0;
             }, 50);
             
             lucide.createIcons();
+        }
+
+        function skipSurvey() {
+            // User explicitly wants to skip - hide warning and continue
+            const warningEl = document.getElementById('wizard-incomplete-warning');
+            warningEl.classList.add('hidden');
+            
+            // Track that user skipped survey
+            gtag('event', 'survey_skipped', {
+                event_category: 'engagement',
+                event_label: 'manual_form'
+            });
         }
 
         function backToWizard() {
@@ -1350,7 +1378,7 @@
             const overlay = document.getElementById('step-waitlist-overlay');
             overlay.style.display = 'flex';
             
-            // Scroll vers le haut
+            // Scroll to top
             setTimeout(() => {
                 overlay.scrollTop = 0;
             }, 50);
@@ -1419,6 +1447,11 @@
                 manualForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
+                    gtag('event', 'form_submitted', {
+                        event_category: 'conversion',
+                        event_label: 'manual_diagnosis'
+                    });
+                    
                     const formData = new FormData(manualForm);
                     
                     fetch(manualForm.action, {
@@ -1440,6 +1473,11 @@
             if (waitlistForm) {
                 waitlistForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    
+                    gtag('event', 'form_submitted', {
+                        event_category: 'conversion',
+                        event_label: 'waitlist'
+                    });
                     
                     const formData = new FormData(waitlistForm);
                     
