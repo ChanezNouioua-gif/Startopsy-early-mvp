@@ -24,17 +24,31 @@
         .step-hidden { display: none; }
         .step-active { display: block; animation: fadeIn 0.5s ease-out; }
         
-      #step-5-overlay {
-           position: fixed;
-           top: 0; left: 0; width: 100%; height: 100%;
-           background-color: #2D1B1B;
-           z-index: 9999;
-           display: none;
-           align-items: center;
-           justify-content: center;
-           overflow-y: auto;
-           padding: 2rem 0;
-       }
+        #step-choice-overlay, #step-manual-form-overlay, #step-waitlist-overlay, #step-thankyou-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #2D1B1B;
+            z-index: 9999;
+            display: none;
+            overflow-y: auto;
+            padding: 2rem 0;
+        }
+        
+        /* Centre le contenu mais permet le scroll depuis le haut */
+        #step-choice-overlay > div, 
+        #step-waitlist-overlay > div:not(.absolute),
+        #step-thankyou-overlay > div:not(.absolute) {
+            min-height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Pour le formulaire manuel, pas de centrage vertical */
+        #step-manual-form-overlay {
+            display: none;
+        }
 
         .selected-option {
             background-color: white !important;
@@ -51,6 +65,15 @@
 
         details summary { cursor: pointer; }
         details summary::-webkit-details-marker { display: none; }
+        
+        /* Highlight incomplete wizard warning */
+        .wizard-warning {
+            background: linear-gradient(135deg, rgba(255, 107, 74, 0.2), rgba(255, 107, 74, 0.1));
+            border: 2px solid rgba(255, 107, 74, 0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased overflow-x-hidden selection:bg-orange-100 selection:text-orange-900">
@@ -59,7 +82,6 @@
     <nav class="fixed w-full z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 py-4 px-6 transition-all" id="navbar">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
-                
                 <span class="text-xl font-bold tracking-tight">Startopsy</span>
             </div>
             <button onclick="startDiagnostic()" class="bg-[#2D1B1B] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-black transition-colors">
@@ -92,15 +114,15 @@
                 <div class="flex flex-wrap gap-4 mb-8 text-sm text-gray-600">
                     <div class="flex items-center gap-2">
                         <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
-                        <span>Free during beta</span>
+                        <span><span id="free-spots-hero">10</span> free spots/week</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <i data-lucide="clock" class="w-4 h-4 text-green-500"></i>
-                        <span>2 minutes to complete</span>
+                        <span>10 minutes to complete</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <i data-lucide="zap" class="w-4 h-4 text-green-500"></i>
-                        <span>Instant results</span>
+                        <span>Results in 24h</span>
                     </div>
                 </div>
 
@@ -108,16 +130,16 @@
                     Test my idea now →
                 </button>
 
-                <!-- Social Proof - UPDATED WITH DYNAMIC COUNTER -->
+                <!-- Social Proof -->
                 <div class="mt-8 pt-8 border-t border-gray-200">
                     <div class="grid grid-cols-3 gap-4 text-center">
                         <div>
-                            <div class="text-2xl font-bold text-gray-900" id="signups-count">20</div>
-                            <div class="text-xs text-gray-500">Beta signups</div>
+                            <div class="text-2xl font-bold text-gray-900" id="diagnoses-done">12</div>
+                            <div class="text-xs text-gray-500">Diagnoses done</div>
                         </div>
                         <div>
-                            <div class="text-2xl font-bold text-gray-900" id="spots-left">25</div>
-                            <div class="text-xs text-gray-500">Spots left</div>
+                            <div class="text-2xl font-bold text-orange-600" id="free-spots-left">10</div>
+                            <div class="text-xs text-gray-500">Free spots left</div>
                         </div>
                         <div>
                             <div class="text-2xl font-bold text-orange-600">100%</div>
@@ -127,7 +149,7 @@
                 </div>
             </div>
 
-            <!-- Right Content (Mockup) - RESTE INCHANGÉ -->
+            <!-- Right Content (Mockup) -->
             <div class="relative animate-fade-in opacity-0" style="animation-delay: 0.3s;">
                 <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 relative z-10">
                     <div class="flex justify-between items-center mb-6">
@@ -191,7 +213,55 @@
         </div>
     </section>
 
-    <!-- How It Works Section - RESTE INCHANGÉ -->
+    <!-- Data-Driven Framework Section -->
+    <section class="py-16 bg-gradient-to-br from-orange-50 to-red-50 px-6 border-y border-orange-100">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-[#FF6B4A] font-bold text-sm uppercase tracking-widest">Backed by Data</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                    Analyzed Against Real Failure Patterns
+                </h2>
+                <p class="text-gray-700 text-lg max-w-2xl mx-auto">
+                    Your idea is tested against 80+ documented startup failures across SaaS, marketplaces, e-commerce, and AI using our 7 Red Flags framework.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                <div class="bg-white border border-red-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-red-500 text-4xl font-bold mb-2">42%</div>
+                    <div class="text-gray-900 text-sm font-semibold mb-1">Problem-Solution Fit</div>
+                    <div class="text-gray-600 text-xs">Most common killer</div>
+                </div>
+                
+                <div class="bg-white border border-orange-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-orange-500 text-4xl font-bold mb-2">29%</div>
+                    <div class="text-gray-900 text-sm font-semibold mb-1">Market Size</div>
+                    <div class="text-gray-600 text-xs">Too small to scale</div>
+                </div>
+                
+                <div class="bg-white border border-yellow-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-yellow-600 text-4xl font-bold mb-2">23%</div>
+                    <div class="text-gray-900 text-sm font-semibold mb-1">Business Model</div>
+                    <div class="text-gray-600 text-xs">Can't monetize</div>
+                </div>
+                
+                <div class="bg-white border border-blue-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                    <div class="text-blue-500 text-4xl font-bold mb-2">19%</div>
+                    <div class="text-gray-900 text-sm font-semibold mb-1">Go-to-Market</div>
+                    <div class="text-gray-600 text-xs">Can't reach customers</div>
+                </div>
+            </div>
+
+            <div class="text-center mt-10">
+                <p class="text-gray-600 text-sm flex items-center justify-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4 text-[#FF6B4A]"></i>
+                    Based on analysis of 80+ documented startup post-mortems
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
     <section class="py-20 bg-gray-50 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
@@ -206,14 +276,17 @@
 
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Step 1 -->
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border-2 border-[#FF6B4A] hover:shadow-lg transition-shadow relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#FF6B4A] text-white text-xs font-bold px-3 py-1 rounded-full">
+                        LIVE NOW
+                    </div>
                     <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#FF6B4A] mb-6">
                         <i data-lucide="search"></i>
                     </div>
                     <div class="text-sm font-bold text-[#FF6B4A] uppercase tracking-wider mb-2">Step 1 - TEST</div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Pre-Mortem Analysis</h3>
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        Answer 6 questions about your idea. Get instant risk analysis against real startup failures.
+                        Answer strategic questions about your idea. Get manual expert analysis within 24h.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li class="flex items-start gap-2">
@@ -230,82 +303,79 @@
                         </li>
                     </ul>
                     <div class="mt-6 pt-6 border-t border-gray-100">
-                        <div class="text-xs text-gray-500 mb-1">First 50 get it</div>
-                        <div class="text-2xl font-bold text-gray-900">9$</div>
+                        <div class="text-xs text-gray-500 mb-1">Limited to 10/week</div>
+                        <div class="text-2xl font-bold text-gray-900">1,600 DA (≈$12)</div>
                         <div class="text-xs text-gray-500">Manual expert analysis</div>
                     </div>
                 </div>
 
                 <!-- Step 2 -->
-                <div class="bg-white rounded-2xl p-8 shadow-sm border-2 border-[#FF6B4A] hover:shadow-lg transition-shadow relative">
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#FF6B4A] text-white text-xs font-bold px-3 py-1 rounded-full">
-                        MOST POPULAR
-                    </div>
-                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#FF6B4A] mb-6">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
+                    <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 mb-6">
                         <i data-lucide="compass"></i>
                     </div>
-                    <div class="text-sm font-bold text-[#FF6B4A] uppercase tracking-wider mb-2">Step 2 - FIX</div>
+                    <div class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Step 2 - FIX</div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Guided Execution</h3>
                     <p class="text-gray-600 mb-6 leading-relaxed">
                         If verdict = GO, we guide you step-by-step from validation to your first customer.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Weekly check-ins & roadmap</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Templates & frameworks</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Avoid common mistakes</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Private founder community</span>
                         </li>
                     </ul>
                     <div class="mt-6 pt-6 border-t border-gray-100">
-                        <div class="text-xs text-gray-500 mb-1">Optional after analysis</div>
-                        <div class="text-2xl font-bold text-gray-900">$29<span class="text-base font-normal text-gray-500">/month</span></div>
-                        <div class="text-xs text-gray-500">Cancel anytime</div>
+                        <div class="text-xs text-gray-500 mb-1">Coming soon</div>
+                        <div class="text-2xl font-bold text-gray-400">Monthly subscription</div>
+                        <div class="text-xs text-gray-500">After successful analysis</div>
                     </div>
                 </div>
 
                 <!-- Step 3 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
-                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-[#FF6B4A] mb-6">
+                    <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 mb-6">
                         <i data-lucide="rocket"></i>
                     </div>
-                    <div class="text-sm font-bold text-[#FF6B4A] uppercase tracking-wider mb-2">Step 3 - WIN</div>
+                    <div class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Step 3 - WIN</div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Launch Support</h3>
                     <p class="text-gray-600 mb-6 leading-relaxed">
                         Get your first customers and scale. GTM strategy, pitch deck, and investor intros.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-600">
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Go-to-market strategy</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Pitch deck review</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Customer acquisition help</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                            <i data-lucide="check" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
                             <span>Network & partnerships</span>
                         </li>
                     </ul>
                     <div class="mt-6 pt-6 border-t border-gray-100">
-                        <div class="text-xs text-gray-500 mb-1">Included in</div>
-                        <div class="text-2xl font-bold text-gray-900">Coaching plan</div>
-                        <div class="text-xs text-gray-500">No extra cost</div>
+                        <div class="text-xs text-gray-500 mb-1">Coming soon</div>
+                        <div class="text-2xl font-bold text-gray-400">Included</div>
+                        <div class="text-xs text-gray-500">In coaching plan</div>
                     </div>
                 </div>
             </div>
@@ -314,7 +384,7 @@
                 <button onclick="startDiagnostic()" class="bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-8 py-4 rounded-full font-semibold inline-flex items-center gap-2 transition-all shadow-lg shadow-orange-200 transform hover:scale-105">
                     Start testing your idea →
                 </button>
-                <p class="text-sm text-gray-500 mt-4">Takes 2 minutes • Expert analysis • No credit card required</p>
+                <p class="text-sm text-gray-500 mt-4">Takes 10 minutes • Expert analysis • <span id="free-spots-cta">10</span> free spots left</p>
             </div>
         </div>
     </section>
@@ -354,7 +424,7 @@
                         <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
                     </summary>
                     <p class="mt-4 text-gray-600 leading-relaxed">
-                        Yes! First 25 founders get a free manual expert analysis. After that, we'll launch the automated version. The coaching program is optional at $29/month.
+                        Yes! We offer 10 free manual expert analyses per week. After that, it costs $12. The automated version (coming soon) will always be free.
                     </p>
                 </details>
 
@@ -374,14 +444,14 @@
                         <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
                     </summary>
                     <p class="mt-4 text-gray-600 leading-relaxed">
-                        You'll receive a preliminary insight within 1 hour. After answering a few follow-up questions, you'll get your complete analysis within 24h. It's worth the wait - this is a manual expert review, not an automated template.
+                        You'll receive your complete manual analysis within 24 hours. It's worth the wait - this is a detailed expert review, not an automated template.
                     </p>
                 </details>
             </div>
         </div>
     </section>
 
-    <!-- Wizard Section Container  -->
+    <!-- Wizard Section Container (Initial Survey) -->
     <section id="wizard-section" class="py-24 bg-white min-h-[80vh] flex flex-col justify-center hidden">
         <div class="max-w-3xl mx-auto px-6 w-full">
             
@@ -525,8 +595,8 @@
                             <div class="flex items-start gap-3">
                                 <i data-lucide="gift" class="w-5 h-5 text-green-600 mt-0.5"></i>
                                 <div>
-                                    <p class="font-bold text-green-900 mb-1">FREE for first 50</p>
-                                    <p class="text-sm text-green-700">Manual expert analysis normally $19. We just want to know what you'd pay.</p>
+                                    <p class="font-bold text-green-900 mb-1">FREE for first <span id="free-spots-step4">10</span> this week</p>
+                                    <p class="text-sm text-green-700">Manual expert analysis normally $12. We just want to know what you'd pay.</p>
                                 </div>
                             </div>
                         </div>
@@ -534,19 +604,19 @@
                         <div class="space-y-3 options-container" data-step="4">
                             <div class="option-card flex items-center gap-4 p-5 rounded-xl border-2 bg-white/60 border-transparent hover:bg-white hover:border-gray-200 cursor-pointer transition-all" onclick="selectOption(4, this)">
                                 <div class="circle w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border border-gray-200 bg-white text-gray-400">A</div>
-                                <span class="font-medium text-gray-600">$9 (Less than lunch)</span>
+                                <span class="font-medium text-gray-600">1,200 DA (≈$9)(Less than lunch)</span>
                             </div>
                             <div class="option-card flex items-center gap-4 p-5 rounded-xl border-2 bg-white/60 border-transparent hover:bg-white hover:border-gray-200 cursor-pointer transition-all" onclick="selectOption(4, this)">
                                 <div class="circle w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border border-gray-200 bg-white text-gray-400">B</div>
-                                <span class="font-medium text-gray-600">$19 (Price of a good book)</span>
+                                <span class="font-medium text-gray-600">1,600 DA (≈$12)(Price of a good book)</span>
                             </div>
                             <div class="option-card flex items-center gap-4 p-5 rounded-xl border-2 bg-white/60 border-transparent hover:bg-white hover:border-gray-200 cursor-pointer transition-all" onclick="selectOption(4, this)">
                                 <div class="circle w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border border-gray-200 bg-white text-gray-400">C</div>
-                                <span class="font-medium text-gray-600">$29+ (Worth every penny)</span>
+                                <span class="font-medium text-gray-600">+3,900 DA (≈$29+) (Worth every penny)</span>
                             </div>
                             <div class="option-card flex items-center gap-4 p-5 rounded-xl border-2 bg-white/60 border-transparent hover:bg-white hover:border-gray-200 cursor-pointer transition-all" onclick="selectOption(4, this)">
                                 <div class="circle w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border border-gray-200 bg-white text-gray-400">D</div>
-                                <span class="font-medium text-gray-600">$0 - I prefer to figure it out myself</span>
+                                <span class="font-medium text-gray-600">0 DA - I prefer to figure it out myself</span>
                             </div>
                         </div>
 
@@ -635,8 +705,8 @@
                         </div>
 
                         <div class="mt-10 flex justify-end">
-                            <button id="btn-6" disabled class="flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-all bg-gray-100 text-gray-400 cursor-not-allowed" onclick="showFinale()">
-                                See my results <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            <button id="btn-6" disabled class="flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-all bg-gray-100 text-gray-400 cursor-not-allowed" onclick="showChoiceOverlay()">
+                                Continue <i data-lucide="arrow-right" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
@@ -646,129 +716,420 @@
         </div>
     </section>
 
-    <!-- Final Overlay - UPDATED WITH DYNAMIC COUNTER -->
-    <div id="step-5-overlay">
-        <!-- Background Animations -->
+    <!-- Choice Overlay -->
+    <div id="step-choice-overlay">
         <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A] rounded-full blur-[120px] opacity-30 translate-x-1/3 -translate-y-1/3 pointer-events-none animate-pulse-slow"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-600 rounded-full blur-[100px] opacity-20 -translate-x-1/3 translate-y-1/3 pointer-events-none animate-pulse-slow" style="animation-delay: 2s;"></div>
 
-        <!-- Form Screen -->
-        <div id="form-screen" class="relative z-10 w-full max-w-4xl mx-auto text-center px-6 py-12 animate-fade-in">
+        <div class="relative z-10 w-full max-w-5xl mx-auto text-center px-6 py-12 animate-fade-in">
+            <span class="inline-block px-4 py-1 rounded-full bg-white/10 text-[#FF6B4A] text-xs font-bold uppercase tracking-widest mb-6 border border-white/5">
+                Thanks for completing the survey!
+            </span>
+            
+            <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+                What would you like to do next?
+            </h2>
+            
+            <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
+                Get a personalized manual analysis of your startup idea, or join the waitlist for the automated version.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Manual Analysis Option -->
+                <div class="bg-gradient-to-br from-white/10 to-white/5 border-2 border-[#FF6B4A] rounded-2xl p-8 backdrop-blur-md relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#FF6B4A] text-white text-xs font-bold px-3 py-1 rounded-full">
+                        RECOMMENDED
+                    </div>
+                    <div class="w-16 h-16 bg-[#FF6B4A] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="user-check" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Get Manual Diagnosis</h3>
+                    <p class="text-gray-300 mb-6">Answer detailed questions about your startup and get expert analysis within 24h</p>
+                    
+                    <div class="space-y-3 text-left text-white mb-6">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm">Personalized risk analysis</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm">GO/PIVOT/STOP verdict</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm">Actionable next steps</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/10 rounded-xl p-4 mb-6 text-white">
+                        <p class="text-sm">🎁 <strong>FREE</strong> for first <span id="free-spots-choice">10</span> this week</p>
+                        <p class="text-xs text-gray-300 mt-1">Then $12 for manual expert analysis</p>
+                    </div>
+
+                    <button onclick="showManualFormOverlay()" class="w-full bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-6 py-4 rounded-full font-bold transition-all shadow-lg shadow-[#FF6B4A]/20 transform hover:scale-105">
+                        Get My Diagnosis Now
+                    </button>
+                </div>
+
+                <!-- Waitlist Option -->
+                <div class="bg-gradient-to-br from-white/5 to-white/0 border border-white/20 rounded-2xl p-8 backdrop-blur-md">
+                    <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="cpu" class="w-8 h-8 text-gray-300"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Join Waitlist</h3>
+                    <p class="text-gray-300 mb-6">Get notified when we launch the instant automated analysis tool</p>
+                    
+                    <div class="space-y-3 text-left text-white mb-6">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-gray-400">Instant automated analysis</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-gray-400">Results in seconds</span>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="check" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                            <span class="text-sm text-gray-400">Free for early adopters</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 rounded-xl p-4 mb-6 text-gray-400">
+                        <p class="text-sm">Coming soon • Be first to know</p>
+                    </div>
+
+                    <button onclick="showWaitlistOverlay()" class="w-full bg-white/10 hover:bg-white/20 text-white px-6 py-4 rounded-full font-bold transition-all border border-white/20">
+                        I'll Wait for Automated
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-gray-400 text-sm mt-8">
+                🔒 No spam, no credit card required
+            </p>
+        </div>
+    </div>
+
+    <!-- Manual Form Overlay -->
+    <div id="step-manual-form-overlay">
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A] rounded-full blur-[120px] opacity-30 translate-x-1/3 -translate-y-1/3 pointer-events-none animate-pulse-slow"></div>
+        
+        <div class="relative z-10 w-full max-w-3xl mx-auto px-6 py-12">
+            <button onclick="backToChoice()" class="text-white/60 hover:text-white mb-6 flex items-center gap-2 text-sm">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+            </button>
+            
+            <!-- Warning if survey incomplete -->
+            <div id="wizard-incomplete-warning" class="wizard-warning hidden mb-6">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
+                    <div class="text-white">
+                        <p class="font-bold mb-1">Survey incomplet</p>
+                        <p class="text-sm text-gray-300">Vous n'avez pas complété les 6 questions du sondage. Les réponses aident à personnaliser votre analyse.</p>
+                        <button onclick="backToWizard()" class="mt-2 text-[#FF6B4A] hover:text-[#ff5530] font-medium text-sm underline">
+                            ← Retourner au sondage
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <span class="inline-block px-4 py-1 rounded-full bg-white/10 text-[#FF6B4A] text-xs font-bold uppercase tracking-widest mb-6 border border-white/5">
+                Tell us about your startup
+            </span>
+            
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
+                Get your free manual analysis
+            </h2>
+            
+            <p class="text-gray-300 text-lg mb-8">
+                We'll analyze your idea against 80+ real startup failures and send you a detailed report within 24h.
+            </p>
+
+            <form action="https://formsubmit.co/startopsy1@gmail.com" method="POST" class="space-y-6" id="manual-diagnosis-form">
+                <!-- Email -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Your email *</label>
+                    <input 
+                        type="email" 
+                        name="email"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        placeholder="you@example.com"
+                        required
+                    >
+                </div>
+
+                <!-- Idea Description -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Describe your idea in one sentence *</label>
+                    <textarea 
+                        name="idea_description"
+                        rows="2"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all resize-none"
+                        placeholder="Example: A mobile app that connects freelance designers with small businesses"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Last Problem Experience -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Describe the LAST TIME your target customer experienced this problem *</label>
+                    <textarea 
+                        name="last_problem_experience"
+                        rows="3"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all resize-none"
+                        placeholder="Be specific: When? Where? What did they do? How did they feel?"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Current Solution -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">How are they solving this problem TODAY? *</label>
+                    <select 
+                        name="current_solution"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        required
+                    >
+                        <option value="" class="bg-[#2D1B1B]">Select current solution</option>
+                        <option value="Not solving - living with pain" class="bg-[#2D1B1B]">They're not solving it (just living with the pain)</option>
+                        <option value="Manual workaround" class="bg-[#2D1B1B]">Manual workaround (spreadsheets, notes, etc.)</option>
+                        <option value="Paying for solution" class="bg-[#2D1B1B]">Paying for an existing solution</option>
+                        <option value="Built internal tool" class="bg-[#2D1B1B]">Built their own internal tool</option>
+                        <option value="Don't realize problem" class="bg-[#2D1B1B]">They don't realize it's a problem</option>
+                    </select>
+                </div>
+
+                <!-- Customer Locations -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Name 3 specific places where your target customers hang out online RIGHT NOW *</label>
+                    <input 
+                        type="text"
+                        name="customer_locations"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        placeholder="e.g., r/startups, ProductHunt, LinkedIn #saas groups"
+                        required
+                    >
+                </div>
+
+                <!-- Organic Reach -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">How many of these people can you reach WITHOUT paid ads? *</label>
+                    <select 
+                        name="organic_reach"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        required
+                    >
+                        <option value="" class="bg-[#2D1B1B]">Select reach</option>
+                        <option value="0-50" class="bg-[#2D1B1B]">0-50 (I don't have access yet)</option>
+                        <option value="50-500" class="bg-[#2D1B1B]">50-500 (I have some network/groups)</option>
+                        <option value="500-5000" class="bg-[#2D1B1B]">500-5000 (I have an audience/community)</option>
+                        <option value="5000+" class="bg-[#2D1B1B]">5000+ (I have a distribution channel)</option>
+                    </select>
+                </div>
+
+                <!-- 30-Day Plan -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">What's your plan to get your FIRST paying customer in the next 30 days? *</label>
+                    <textarea 
+                        name="thirty_day_plan"
+                        rows="3"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all resize-none"
+                        placeholder="Be specific: Day 1 I will..., Day 7 I will..., etc."
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Current Cost -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">What's the CURRENT cost of this problem for your customer? *</label>
+                    <select 
+                        name="current_cost"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        required
+                    >
+                        <option value="" class="bg-[#2D1B1B]">Select cost</option>
+                        <option value="No cost - annoying" class="bg-[#2D1B1B]">No direct cost (just annoying)</option>
+                        <option value="$0-100/month" class="bg-[#2D1B1B]">$0-100/month in time or money</option>
+                        <option value="$100-1000/month" class="bg-[#2D1B1B]">$100-1000/month</option>
+                        <option value="$1000+/month" class="bg-[#2D1B1B]">$1000+/month</option>
+                        <option value="Don't know" class="bg-[#2D1B1B]">I don't know yet</option>
+                    </select>
+                </div>
+
+                <!-- Competitor Pricing -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">What are they paying for similar solutions TODAY? *</label>
+                    <input 
+                        type="text"
+                        name="competitor_pricing"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        placeholder="e.g., $49/mo for Notion, $200/mo for HubSpot"
+                        required
+                    >
+                </div>
+
+                <!-- Ready Customers -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">If you launched TODAY at $X/month, would you have 3 customers ready to pay? *</label>
+                    <select 
+                        name="customers_ready"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        required
+                    >
+                        <option value="" class="bg-[#2D1B1B]">Select answer</option>
+                        <option value="Yes - talked pricing" class="bg-[#2D1B1B]">Yes, I've already talked to them about pricing</option>
+                        <option value="Probably - haven't asked" class="bg-[#2D1B1B]">Probably, but I haven't asked about money yet</option>
+                        <option value="Maybe - need validation" class="bg-[#2D1B1B]">Maybe, I need to validate this</option>
+                        <option value="No - haven't talked" class="bg-[#2D1B1B]">No, I haven't talked to potential customers yet</option>
+                    </select>
+                </div>
+
+                <!-- Top Competitors -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Name your top 3 competitors (or closest alternatives) *</label>
+                    <input 
+                        type="text"
+                        name="top_competitors"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        placeholder="e.g., Notion, Airtable, Google Sheets"
+                        required
+                    >
+                </div>
+
+                <!-- Why Not Solved -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Why did the TOP competitor in your space NOT solve this already? *</label>
+                    <select 
+                        name="why_not_solved"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all"
+                        required
+                    >
+                        <option value="" class="bg-[#2D1B1B]">Select reason</option>
+                        <option value="Don't know problem exists" class="bg-[#2D1B1B]">They don't know this problem exists</option>
+                        <option value="Too niche" class="bg-[#2D1B1B]">It's too niche for them (not worth their time)</option>
+                        <option value="Tried and failed" class="bg-[#2D1B1B]">They tried and failed</option>
+                        <option value="Limitations" class="bg-[#2D1B1B]">Technical/strategic limitations</option>
+                        <option value="No competitors" class="bg-[#2D1B1B]">I don't know / There are no competitors</option>
+                    </select>
+                </div>
+
+                <!-- Unfair Advantage -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">What's your unfair advantage that they CAN'T copy in 6 months? *</label>
+                    <textarea 
+                        name="unfair_advantage"
+                        rows="3"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all resize-none"
+                        placeholder="e.g., proprietary data, unique distribution, technical breakthrough, network effects"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Founder Fit -->
+                <div>
+                    <label class="block text-white font-medium mb-2 text-sm">Why are YOU the right person for this? *</label>
+                    <textarea 
+                        name="founder_fit"
+                        rows="3"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all resize-none"
+                        placeholder="Your background, experience, or unique insight"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Hidden fields for survey -->
+                <input type="hidden" name="survey_q1" id="hidden-step1">
+                <input type="hidden" name="survey_q2" id="hidden-step2">
+                <input type="hidden" name="survey_q3" id="hidden-step3">
+                <input type="hidden" name="survey_q4" id="hidden-step4">
+                <input type="hidden" name="survey_q5" id="hidden-step5">
+                <input type="hidden" name="survey_q6" id="hidden-step6">
+                <input type="hidden" name="_subject" value="New Manual Diagnosis Request - Startopsy v2">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="type" value="manual_diagnosis">
+                
+                <button type="submit" class="w-full bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-8 py-5 rounded-full font-bold text-lg transition-all shadow-lg shadow-[#FF6B4A]/20 transform hover:scale-105 active:scale-95">
+                    Submit & Get Free Analysis
+                </button>
+
+                <p class="text-gray-400 text-sm text-center">
+                    🔒 Free for first <span id="free-spots-form">10</span> • Delivered in 24h
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Waitlist Overlay -->
+    <div id="step-waitlist-overlay">
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A] rounded-full blur-[120px] opacity-30 translate-x-1/3 -translate-y-1/3 pointer-events-none animate-pulse-slow"></div>
+        
+        <div class="relative z-10 w-full max-w-3xl mx-auto px-6 py-12">
+            <button onclick="backToChoice()" class="text-white/60 hover:text-white mb-6 flex items-center gap-2 text-sm">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+            </button>
+            
             <span class="inline-block px-4 py-1 rounded-full bg-white/10 text-[#FF6B4A] text-xs font-bold uppercase tracking-widest mb-6 border border-white/5">
                 Join Early Access
             </span>
             
-            <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
-                 Limited spots available
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
+                Get notified when we launch
             </h2>
             
-            <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
-              Join our beta waitlist to get instant access when we launch.
-              First 50 founders get lifetime free access to pre-mortem analysis.
+            <p class="text-gray-300 text-lg mb-8">
+                Be the first to know when our automated analysis tool is ready. Free for early adopters.
             </p>
 
-            <!-- What You'll Get Preview -->
-            <div class="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-8 mb-8 max-w-2xl mx-auto backdrop-blur-md">
-                <div class="flex items-center justify-center gap-3 text-white font-bold mb-6 text-xl">
-                    <i data-lucide="check-circle"></i> What you'll get:
+            <form action="https://formsubmit.co/startopsy1@gmail.com" method="POST" class="space-y-6" id="waitlist-form">
+                <div>
+                    <input 
+                        type="email" 
+                        name="email"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all text-lg"
+                        placeholder="Enter your email"
+                        required
+                    >
                 </div>
-                
-                <div class="grid md:grid-cols-2 gap-4 text-left text-white">
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="target" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <div>
-                            <p class="font-bold">Risk Score</p>
-                            <p class="text-sm text-gray-300">Overall risk percentage (0-100%)</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="alert-triangle" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <div>
-                            <p class="font-bold">Top Red Flags</p>
-                            <p class="text-sm text-gray-300">3 biggest risks to fix</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="clipboard-check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <div>
-                            <p class="font-bold">Verdict</p>
-                            <p class="text-sm text-gray-300">GO / PIVOT / STOP recommendation</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="map" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <div>
-                            <p class="font-bold">Action Plan</p>
-                            <p class="text-sm text-gray-300">Personalized next steps</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="bg-gradient-to-br from-[#FF6B4A]/20 to-[#FF6B4A]/5 border border-[#FF6B4A]/30 rounded-2xl p-8 mb-12 max-w-xl mx-auto backdrop-blur-md shadow-2xl">
-                <div class="flex items-center justify-center gap-3 text-[#FF6B4A] font-bold mb-4 text-xl">
-                    <i data-lucide="gift" class="animate-bounce"></i> Beta Access Benefits
-                </div>
-                <div class="text-left space-y-3 text-white">
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <span>Free manual expert analysis (first 25 only)</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <span>Priority support + direct feedback channel</span>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i data-lucide="check" class="w-5 h-5 text-[#FF6B4A] mt-0.5 flex-shrink-0"></i>
-                        <span>Early access to coaching program</span>
-                    </div>
-                </div>
-                <p class="text-xs text-gray-400 mt-3 text-center">
-                    <strong class="text-orange-300" id="spots-remaining-overlay">25/50</strong> beta spots remaining
-                </p>
-            </div>
-
-            <form action="https://formsubmit.co/startopsy1@gmail.com" method="POST" class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto w-full" id="waitlist-form">
-                <input 
-                    type="email" 
-                    name="email"
-                    placeholder="Enter your email" 
-                    class="w-full bg-white/5 border border-white/10 rounded-full px-8 py-5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] focus:bg-white/10 transition-all text-lg"
-                    required
-                    autofocus
-                >
-                <input type="hidden" name="step1" id="hidden-step1">
-                <input type="hidden" name="step2" id="hidden-step2">
-                <input type="hidden" name="step3" id="hidden-step3">
-                <input type="hidden" name="step4" id="hidden-step4">
-                <input type="hidden" name="step5" id="hidden-step5">
-                <input type="hidden" name="step6" id="hidden-step6">
-                <input type="hidden" name="_subject" value="New Startopsy Beta Signup">
+                <input type="hidden" name="survey_q1" id="hidden-step1-waitlist">
+                <input type="hidden" name="survey_q2" id="hidden-step2-waitlist">
+                <input type="hidden" name="survey_q3" id="hidden-step3-waitlist">
+                <input type="hidden" name="survey_q4" id="hidden-step4-waitlist">
+                <input type="hidden" name="survey_q5" id="hidden-step5-waitlist">
+                <input type="hidden" name="survey_q6" id="hidden-step6-waitlist">
+                <input type="hidden" name="_subject" value="New Waitlist Signup - Startopsy">
                 <input type="hidden" name="_captcha" value="false">
                 <input type="hidden" name="_template" value="table">
-                <button type="submit" class="w-full sm:w-auto bg-[#FF6B4A] hover:bg-[#ff5530] text-white whitespace-nowrap px-10 py-5 rounded-full font-bold text-lg transition-all shadow-lg shadow-[#FF6B4A]/20 transform hover:scale-105 active:scale-95">
+                <input type="hidden" name="type" value="waitlist">
+                
+                <button type="submit" class="w-full bg-[#FF6B4A] hover:bg-[#ff5530] text-white px-8 py-5 rounded-full font-bold text-lg transition-all shadow-lg shadow-[#FF6B4A]/20 transform hover:scale-105 active:scale-95">
                     Join Waitlist
                 </button>
-            </form>
-            
-            <p class="text-gray-400 text-sm mt-6">
-                🔒 No spam. We'll email you your analysis within 24h.
-            </p>
-        </div>
 
-        <!-- Thank You Screen -->
-        <div id="thank-you-screen" class="relative z-10 w-full max-w-4xl mx-auto text-center px-4 py-4 hidden">
+                <p class="text-gray-400 text-sm text-center">
+                    🔒 No spam. We'll email you when we launch.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thank You Overlay -->
+    <div id="step-thankyou-overlay">
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B4A] rounded-full blur-[120px] opacity-30 translate-x-1/3 -translate-y-1/3 pointer-events-none animate-pulse-slow"></div>
+        
+        <div class="relative z-10 w-full max-w-4xl mx-auto text-center px-6 py-12">
             <div class="animate-fade-in">
                 <div class="w-20 h-20 bg-[#FF6B4A] rounded-full flex items-center justify-center mx-auto mb-8" style="animation: scaleIn 0.5s ease-out;">
                     <i data-lucide="check" style="width: 48px; height: 48px; stroke-width: 3; color: white;"></i>
                 </div>
 
                 <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
-                    You're in ! 
+                    You're in! 🎉 
                 </h2>
                 
-                <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
-                    We've sent you a preliminary insight based on your answers.
+                <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed" id="thankyou-message">
+                    Check your email - we've sent you the next steps!
                 </p>
 
                 <div class="bg-gradient-to-br from-[#FF6B4A]/20 to-[#FF6B4A]/5 border border-[#FF6B4A]/30 rounded-2xl p-8 mb-8 max-w-2xl mx-auto backdrop-blur-md">
@@ -776,31 +1137,8 @@
                         <i data-lucide="calendar"></i> What happens next?
                     </div>
                     
-                    <div class="text-left space-y-4">
-                        <div class="flex items-start gap-4">
-                            <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">
-                                1
-                            </div>
-                            <div class="text-white">
-                                <span class="font-bold">In minutes:</span> Check your email for a personalized insight
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">
-                                2
-                            </div>
-                            <div class="text-white">
-                                <span class="font-bold">Reply to our email:</span> Answer a few follow-up questions for full analysis
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">
-                                3
-                            </div>
-                            <div class="text-white">
-                                <span class="font-bold">Within 24h:</span> Receive your complete pre-mortem analysis
-                            </div>
-                        </div>
+                    <div class="text-left space-y-4" id="thankyou-steps">
+                        <!-- Steps will be inserted dynamically -->
                     </div>
                 </div>
 
@@ -810,7 +1148,7 @@
                         <a href="https://twitter.com/startopsy" target="_blank" class="w-12 h-12 bg-white/10 border border-white/20 rounded-lg flex items-center justify-center hover:bg-[#FF6B4A] hover:border-[#FF6B4A] transition-all text-white">
                             <i data-lucide="twitter"></i>
                         </a>
-                        <a href="https://linkedin.com/company/startopsy" target="_blank" class="w-12 h-12 bg-white/10 border border-white/20 rounded-lg flex items-center justify-center hover:bg-[#FF6B4A] hover:border-[#FF6B4A] transition-all text-white">
+                        <a href="https://linkedin.com/company/startopsy1" target="_blank" class="w-12 h-12 bg-white/10 border border-white/20 rounded-lg flex items-center justify-center hover:bg-[#FF6B4A] hover:border-[#FF6B4A] transition-all text-white">
                             <i data-lucide="linkedin"></i>
                         </a>
                     </div>
@@ -822,42 +1160,54 @@
     <script>
         lucide.createIcons();
 
-        // Counter management - starts at 25
-        const TOTAL_SPOTS = 50;
-        let currentSpots = 25;
+        // Counter management
+        const TOTAL_FREE_SPOTS = 10;
+        let currentFreeSpots = 10;
+        let totalDiagnoses = 12;
 
-        // Load counter from localStorage
         function loadCounter() {
-            const saved = localStorage.getItem('startopsy_spots');
-            if (saved) {
-                currentSpots = parseInt(saved);
-            }
+            const savedSpots = localStorage.getItem('startopsy_free_spots');
+            const savedDiagnoses = localStorage.getItem('startopsy_diagnoses');
+            
+            if (savedSpots) currentFreeSpots = parseInt(savedSpots);
+            if (savedDiagnoses) totalDiagnoses = parseInt(savedDiagnoses);
+            
             updateCounterDisplay();
         }
 
-        // Save counter to localStorage
         function saveCounter() {
-            localStorage.setItem('startopsy_spots', currentSpots.toString());
+            localStorage.setItem('startopsy_free_spots', currentFreeSpots.toString());
+            localStorage.setItem('startopsy_diagnoses', totalDiagnoses.toString());
         }
 
-        // Update counter display
         function updateCounterDisplay() {
-            const signupsCount = TOTAL_SPOTS - currentSpots;
-            document.getElementById('signups-count').textContent = signupsCount;
-            document.getElementById('spots-left').textContent = currentSpots;
-            document.getElementById('spots-remaining-overlay').textContent = `${currentSpots}/${TOTAL_SPOTS}`;
+            const freeSpotElements = [
+                'free-spots-hero',
+                'free-spots-left',
+                'free-spots-cta',
+                'free-spots-step4',
+                'free-spots-choice',
+                'free-spots-form'
+            ];
+            
+            freeSpotElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = currentFreeSpots;
+            });
+
+            const diagnosesEl = document.getElementById('diagnoses-done');
+            if (diagnosesEl) diagnosesEl.textContent = totalDiagnoses;
         }
 
-        // Decrease counter
-        function decreaseCounter() {
-            if (currentSpots > 0) {
-                currentSpots--;
+        function decreaseFreeSpots() {
+            if (currentFreeSpots > 0) {
+                currentFreeSpots--;
+                totalDiagnoses++;
                 saveCounter();
                 updateCounterDisplay();
             }
         }
 
-        // Initialize counter on page load
         loadCounter();
 
         let userSelections = {
@@ -868,6 +1218,11 @@
             step5: null,
             step6: null
         };
+
+        // Check if wizard is complete
+        function isWizardComplete() {
+            return Object.values(userSelections).every(val => val !== null);
+        }
 
         function startDiagnostic() {
             const wizard = document.getElementById('wizard-section');
@@ -928,7 +1283,24 @@
             lucide.createIcons();
         }
 
-        function showFinale() {
+        function showChoiceOverlay() {
+            document.getElementById('step-choice-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function showManualFormOverlay() {
+            // Check if wizard is complete
+            const wizardComplete = isWizardComplete();
+            const warningEl = document.getElementById('wizard-incomplete-warning');
+            
+            if (!wizardComplete) {
+                warningEl.classList.remove('hidden');
+            } else {
+                warningEl.classList.add('hidden');
+            }
+            
+            // Populate hidden fields with survey answers
             document.getElementById('hidden-step1').value = userSelections.step1 || '';
             document.getElementById('hidden-step2').value = userSelections.step2 || '';
             document.getElementById('hidden-step3').value = userSelections.step3 || '';
@@ -936,40 +1308,142 @@
             document.getElementById('hidden-step5').value = userSelections.step5 || '';
             document.getElementById('hidden-step6').value = userSelections.step6 || '';
             
-            document.getElementById('step-5-overlay').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            document.getElementById('step-choice-overlay').style.display = 'none';
+            const overlay = document.getElementById('step-manual-form-overlay');
+            overlay.style.display = 'block';
+            
+            // IMPORTANT: Scroll vers le haut de l'overlay
+            setTimeout(() => {
+                overlay.scrollTop = 0;
+            }, 50);
+            
             lucide.createIcons();
         }
 
+        function backToWizard() {
+            document.getElementById('step-manual-form-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Scroll back to wizard
+            const wizard = document.getElementById('wizard-section');
+            wizard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showWaitlistOverlay() {
+            // Populate waitlist hidden fields
+            document.getElementById('hidden-step1-waitlist').value = userSelections.step1 || '';
+            document.getElementById('hidden-step2-waitlist').value = userSelections.step2 || '';
+            document.getElementById('hidden-step3-waitlist').value = userSelections.step3 || '';
+            document.getElementById('hidden-step4-waitlist').value = userSelections.step4 || '';
+            document.getElementById('hidden-step5-waitlist').value = userSelections.step5 || '';
+            document.getElementById('hidden-step6-waitlist').value = userSelections.step6 || '';
+            
+            document.getElementById('step-choice-overlay').style.display = 'none';
+            const overlay = document.getElementById('step-waitlist-overlay');
+            overlay.style.display = 'flex';
+            
+            // Scroll vers le haut
+            setTimeout(() => {
+                overlay.scrollTop = 0;
+            }, 50);
+            
+            lucide.createIcons();
+        }
+
+        function backToChoice() {
+            document.getElementById('step-manual-form-overlay').style.display = 'none';
+            document.getElementById('step-waitlist-overlay').style.display = 'none';
+            document.getElementById('step-choice-overlay').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function showThankYou(type) {
+            document.getElementById('step-choice-overlay').style.display = 'none';
+            document.getElementById('step-manual-form-overlay').style.display = 'none';
+            document.getElementById('step-waitlist-overlay').style.display = 'none';
+            
+            document.getElementById('step-thankyou-overlay').style.display = 'flex';
+            
+            const messageEl = document.getElementById('thankyou-message');
+            const stepsEl = document.getElementById('thankyou-steps');
+            
+            if (type === 'manual') {
+                messageEl.textContent = "We'll analyze your idea and send you the results within 24h.";
+                stepsEl.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">1</div>
+                        <div class="text-white"><span class="font-bold">Now:</span> Our team is reviewing your submission</div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">2</div>
+                        <div class="text-white"><span class="font-bold">Within 24h:</span> Receive your complete pre-mortem analysis</div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">3</div>
+                        <div class="text-white"><span class="font-bold">Next:</span> Decide if you want coaching support (optional)</div>
+                    </div>
+                `;
+            } else {
+                messageEl.textContent = "We'll notify you as soon as the automated version launches!";
+                stepsEl.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">1</div>
+                        <div class="text-white"><span class="font-bold">You're on the list:</span> We'll email you when we launch</div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">2</div>
+                        <div class="text-white"><span class="font-bold">Early access:</span> Free automated analysis for waitlist members</div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 bg-[#FF6B4A] rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold">3</div>
+                        <div class="text-white"><span class="font-bold">Instant results:</span> Get your verdict in seconds</div>
+                    </div>
+                `;
+            }
+            
+            lucide.createIcons();
+        }
+
+        // Form submissions
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('waitlist-form');
-            if (form) {
-                form.addEventListener('submit', function(e) {
+            const manualForm = document.getElementById('manual-diagnosis-form');
+            if (manualForm) {
+                manualForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
-                    const formData = new FormData(form);
+                    const formData = new FormData(manualForm);
                     
-                    fetch(form.action, {
+                    fetch(manualForm.action, {
                         method: 'POST',
                         body: formData,
-                        headers: {
-                            'Accept': 'application/json'
-                        }
+                        headers: { 'Accept': 'application/json' }
                     }).then(response => {
-                        // Decrease counter when form is submitted
-                        decreaseCounter();
-                        
-                        document.getElementById('form-screen').classList.add('hidden');
-                        document.getElementById('thank-you-screen').classList.remove('hidden');
-                        lucide.createIcons();
+                        decreaseFreeSpots();
+                        showThankYou('manual');
                     }).catch(error => {
                         console.error('Error:', error);
-                        // Still decrease counter even on error
-                        decreaseCounter();
-                        
-                        document.getElementById('form-screen').classList.add('hidden');
-                        document.getElementById('thank-you-screen').classList.remove('hidden');
-                        lucide.createIcons();
+                        decreaseFreeSpots();
+                        showThankYou('manual');
+                    });
+                });
+            }
+
+            const waitlistForm = document.getElementById('waitlist-form');
+            if (waitlistForm) {
+                waitlistForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(waitlistForm);
+                    
+                    fetch(waitlistForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    }).then(response => {
+                        showThankYou('waitlist');
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        showThankYou('waitlist');
                     });
                 });
             }
